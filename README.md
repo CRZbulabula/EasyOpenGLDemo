@@ -1,0 +1,2 @@
+# EasyOpenGLDemo
+ Computer graphics assignments
