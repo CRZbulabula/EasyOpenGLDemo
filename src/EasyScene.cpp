@@ -78,14 +78,18 @@ int main()
 
     // build and compile shaders
     // -------------------------
-    Shader normalShader("cubemaps.vs", "cubemaps_normal.fs");
-    Shader inversionShader("cubemaps.vs", "cubemaps_inversion.fs");
-    Shader grayscaleShader("cubemaps.vs", "cubemaps_grayscale.fs");
+    Shader normalShader("vertex_normal.vs", "fragment_normal.fs");
+    Shader inversionShader("vertex_normal.vs", "fragment_inversion.fs");
+    Shader refractShader("vertex_advanced.vs", "fragment_refract.fs");
+    Shader reflectShader("vertex_advanced.vs", "fragment_reflect.fs");
     Shader skyboxShader("skybox.vs", "skybox.fs");
 
     // load models
     // -----------
     Model planetModel(FileSystem::getPath("resources/objects/planet/planet.obj"));
+    Model dragonModel(FileSystem::getPath("resources/objects/dragon_vrip_res4.ply"));
+    Model happyModel(FileSystem::getPath("resources/objects/happy_vrip_res4.ply"));
+    Model bunModel(FileSystem::getPath("resources/objects/bun_zipper_res2.ply"));
 
     // skybox VAO
     unsigned int skyboxVAO, skyboxVBO;
@@ -99,8 +103,6 @@ int main()
 
     // load textures
     // -------------
-    unsigned int cubeTexture = loadTexture(FileSystem::getPath("resources/textures/container.jpg").c_str());
-
     vector<std::string> faces
     {
         FileSystem::getPath("resources/textures/skybox/right.jpg"),
@@ -118,8 +120,10 @@ int main()
     normalShader.setInt("texture1", 0);
     inversionShader.use();
     inversionShader.setInt("texture1", 0);
-    grayscaleShader.use();
-    grayscaleShader.setInt("texture1", 0);
+    refractShader.use();
+    refractShader.setInt("texturel", 0);
+    reflectShader.use();
+    reflectShader.setInt("texturel", 0);
 
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
@@ -143,19 +147,49 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // draw planet as normal
-        normalShader.use();
+        glm::mat4 model;
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+
+        // draw planet as normal
+        normalShader.use();
         normalShader.setMat4("view", view);
         normalShader.setMat4("projection", projection);
-
-        // render the loaded model
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-10.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
         normalShader.setMat4("model", model);
         planetModel.Draw(normalShader);
+
+        // draw dragon as inversion
+        inversionShader.use();
+        inversionShader.setMat4("view", view);
+        inversionShader.setMat4("projection", projection);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-5.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
+        inversionShader.setMat4("model", model);
+        dragonModel.Draw(inversionShader);
+
+        // draw happy as refract
+        refractShader.use();
+        refractShader.setMat4("view", view);
+        refractShader.setMat4("projection", projection);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(5.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
+        refractShader.setMat4("model", model);
+        happyModel.Draw(refractShader);
+
+        // draw bun as reflect
+        reflectShader.use();
+        reflectShader.setMat4("view", view);
+        reflectShader.setMat4("projection", projection);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(10.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(20.0f, 20.0f, 20.0f));
+        reflectShader.setMat4("model", model);
+        bunModel.Draw(reflectShader);
 
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
