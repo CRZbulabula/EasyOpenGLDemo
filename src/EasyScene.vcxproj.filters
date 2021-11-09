@@ -20,10 +20,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EasyCube.h">
+    <ClInclude Include="EasyShader.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="EasyShader.h">
+    <ClInclude Include="EasyCube.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
